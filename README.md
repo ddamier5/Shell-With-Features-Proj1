@@ -6,9 +6,9 @@ expansion, `$PATH` search, external command execution, I/O redirection,
 piping, background processing, and the built-ins `exit`, `cd` and `jobs`.
 
 ## Group Members
-- **Ammiel Bowen**: [FSU email]
+- **Ammiel Bowen**: ab22dv@fsu.edu
 - **Don Damier**: dd23t@fsu.edu
-- **Widens Filsaime**: [FSU email]
+- **Widens Filsaime**: ab22dv@fsu.edu
 
 ## Division of Labor
 
@@ -131,7 +131,7 @@ Document in-person meetings, their purpose, and what was discussed.
 
 | Date       | Attendees            | Topics Discussed | Outcomes / Decisions |
 |------------|----------------------|------------------|-----------------------|
-| YYYY-MM-DD | [Names]              | [Agenda items]   | [Actions/Next steps]  |
+| 2026-09-27 | Don, Ammiel, Widens  | Project          | Discussed and decided |
 
 ## Bugs
 - **Placeholder lexer**: `src/tokenizer.c` only splits on spaces/tabs and

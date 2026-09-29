@@ -17,21 +17,19 @@ end-to-end today, but do not yet do their job:
 |---|---|---|
 | 0. Tokenization | Teammate | Placeholder lexer in `src/tokenizer.c` (whitespace split + splits `< > \| &` into their own tokens). Replace with the real lexer. |
 | 1. Prompt | **Ammiel Bowen (lead)** | Done — `src/prompt.c` |
-| 2. Environment variables | Teammate | Stub in `src/expand.c` (`expand_env_var`); currently a pass-through. |
+| 2. Environment variables | **Ammiel Bowen** | Done — `src/expand.c` (`expand_env_var`); empty expansions are dropped in `src/main.c` |
 | 3. Tilde expansion | **Ammiel Bowen (support)** | Done — `src/expand.c` (`expand_tilde`) |
 | 4. `$PATH` search | **Ammiel Bowen (lead)** | Done — `src/path.c` |
 | 5. External command execution | **Ammiel Bowen (support)** | Done — `src/executor.c` (`execute_command`) |
 | 6. I/O redirection | **Ammiel Bowen (lead)** | Done — `src/executor.c` (`parse_command`, `execute_command`) |
 | 7. Piping | Teammate | Stub in `src/executor.c` (`execute_pipeline`); not yet wired into `main.c`. |
-| 8. Background processing | Teammate | Stubs in `src/jobs.c` (`add_job`, `reap_finished_jobs`); `execute_command()` currently always waits. |
+| 8. Background processing | **Ammiel Bowen** | Done for single commands (with or without redirection) — `src/jobs.c` (`add_job`, `reap_finished_jobs`), `src/executor.c`. Background pipelines need `execute_pipeline()` (Part 7) to call `add_job()` with the last stage's PID. |
 | 9. Internal commands (`exit`, `cd`, `jobs`) | **Ammiel Bowen (support)** | Done — `src/builtins.c`, `src/jobs.c`, `src/history.c` |
 | Extra credit | All members | Not attempted yet — depends on Part 7 (piping) for unlimited pipes and pipe+redirection combo. Shell-ception should work "for free" once tokenization/env-var expansion land, since it only needs external command execution (already implemented) — needs verification on Linux. |
 
-Because Parts 0, 2, 7, and 8 are stubs, the shell as a whole will
-compile and can execute simple commands with `$PATH` search, tilde
-expansion, and I/O redirection, but environment-variable expansion,
-piping, and true (non-blocking) background execution are not yet
-functional. Whoever picks up those parts should search this repo for
+Parts 0 and 7 are still stubs: the shell runs commands with `$PATH`
+search, tilde/environment-variable expansion, I/O redirection, and
+background execution, but piping is not yet functional. Whoever picks up those parts should search this repo for
 `TODO(teammate` to find every integration point.
 
 ## Project Structure
@@ -95,6 +93,11 @@ Canvas submission requirements.)*
   tokenization, environment-variable expansion, piping, and background
   processing so a teammate can pick those up without needing to touch
   the rest of the codebase.
+- 2026-09-28: Implemented environment-variable expansion (Part 2) and
+  background processing (Part 8: job table, `[n] pid` on start,
+  `[n]+ done cmd` on completion, non-blocking reaping each prompt).
+  Finished wiring external command execution (Part 5) into background
+  mode and flushed stdout before `fork()`.
 
 **[Teammate name]**
 - *Add entries here as work is completed.*

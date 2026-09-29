@@ -16,8 +16,8 @@ int main(void) {
     char line[MAX_LINE_LEN];
 
     while (1) {
-        /* Part 8 TODO hook (teammate): reap any background jobs that
-         * finished since the last prompt, printing "[n]+ done ...". */
+        /* Part 8: report background jobs that finished since the last
+         * prompt ("[n]+ done ..."). */
         reap_finished_jobs();
 
         print_prompt();
@@ -46,11 +46,24 @@ int main(void) {
             continue;
         }
 
-        /* Parts 2/3: expand every whole-argument token in place. */
+        /* Parts 2/3: expand every whole-argument token in place. As in
+         * Bash, a "$VAR" that expands to nothing is dropped rather than
+         * passed on as an empty argument. */
         static char expanded_storage[MAX_TOKENS][MAX_LINE_LEN];
+        int kept = 0;
         for (int i = 0; i < ntokens; i++) {
-            expand_token(tokens[i], expanded_storage[i], sizeof(expanded_storage[i]));
-            tokens[i] = expanded_storage[i];
+            expand_token(tokens[i], expanded_storage[kept],
+                         sizeof(expanded_storage[kept]));
+            if (tokens[i][0] == '$' && expanded_storage[kept][0] == '\0') {
+                continue;
+            }
+            tokens[kept] = expanded_storage[kept];
+            kept++;
+        }
+        tokens[kept] = NULL;
+        ntokens = kept;
+        if (ntokens == 0) {
+            continue;
         }
 
         /*
@@ -65,6 +78,7 @@ int main(void) {
             fprintf(stderr, "shell: syntax error\n");
             continue;
         }
+        cmd.cmdline = raw_copy;
 
         if (cmd.argc == 0) {
             continue;

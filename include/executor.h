@@ -11,6 +11,7 @@ typedef struct {
     char *infile;    /* NULL if no "<" redirection was given */
     char *outfile;   /* NULL if no ">" redirection was given */
     int background;  /* 1 if a trailing "&" was seen */
+    const char *cmdline; /* original line, for job messages; set by caller */
 } Command;
 
 /*
@@ -32,11 +33,9 @@ int parse_command(char *tokens[], int ntokens, Command *cmd);
  * wires up cmd->infile/cmd->outfile (validating the input file exists
  * and is a regular file, and creating/truncating the output file with
  * mode 0600) before execv()-ing the resolved path. The parent waits
- * for the child.
- *
- * NOTE(teammate, Part 8): cmd->background is recorded but not yet
- * acted on here — see the comment in executor.c. Wire up add_job()
- * and skip the wait when it's set.
+ * for the child, unless cmd->background is set (Part 8), in which case
+ * the child is registered with add_job() under cmd->cmdline and the
+ * call returns 0 immediately.
  *
  * Returns the child's exit status (0-255) on a normal run, or -1 if
  * the shell itself couldn't run the command at all (not found, fork
@@ -50,6 +49,8 @@ int execute_command(Command *cmd);
  * TODO(teammate): chain `n` Commands with pipe()+dup2(), forking one
  * child per stage and connecting stage i's stdout to stage i+1's
  * stdin. Not yet called from main.c — wire up '|' detection there.
+ * For "cmd1 | cmd2 &", skip the waits and call
+ * add_job(<last stage's pid>, cmds[0].cmdline) instead (Part 8).
  */
 int execute_pipeline(Command *cmds, int n);
 

@@ -12,10 +12,10 @@
 void expand_tilde(const char *token, char *out, size_t out_size);
 
 /*
- * Part 2: Environment variable expansion — NOT assigned to Ammiel Bowen.
- * TODO(teammate): if `token` begins with '$', look the remainder up
- * with getenv() and copy the result into `out` (empty string if
- * unset, matching Bash). Currently a pass-through placeholder.
+ * Part 2: Environment variable expansion (Ammiel Bowen).
+ * If `token` is "$NAME", copies getenv("NAME") into `out` (an empty
+ * string if unset, matching Bash). A lone "$" and tokens not starting
+ * with '$' are copied through unchanged.
  */
 void expand_env_var(const char *token, char *out, size_t out_size);
 

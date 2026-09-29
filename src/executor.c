@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include "executor.h"
+#include "jobs.h"
 #include "path.h"
 #include "shell.h"
 
@@ -17,6 +18,7 @@ int parse_command(char *tokens[], int ntokens, Command *cmd) {
     cmd->infile = NULL;
     cmd->outfile = NULL;
     cmd->background = 0;
+    cmd->cmdline = NULL;
 
     for (int i = 0; i < ntokens; i++) {
         if (strcmp(tokens[i], "<") == 0) {
@@ -30,8 +32,7 @@ int parse_command(char *tokens[], int ntokens, Command *cmd) {
             }
             cmd->outfile = tokens[++i];
         } else if (strcmp(tokens[i], "&") == 0) {
-            /* Recorded for Part 8 (background processing) to act on;
-             * see the NOTE in execute_command() below. */
+            /* Part 8: acted on by execute_command() after the fork. */
             cmd->background = 1;
         } else if (strcmp(tokens[i], "|") == 0) {
             /* Part 7 (piping) is handled by main.c before parse_command()
@@ -66,7 +67,8 @@ static int validate_infile(const char *path) {
     return 0;
 }
 
-/* Part 5 (support) + Part 6 (lead): fork/exec with redirection. */
+/* Part 5 + Part 6 (lead) + Part 8: fork/exec with redirection,
+ * optionally in the background. */
 int execute_command(Command *cmd) {
     if (cmd->argc == 0) {
         return -1;
@@ -81,6 +83,10 @@ int execute_command(Command *cmd) {
         fprintf(stderr, "%s: command not found\n", cmd->argv[0]);
         return -1;
     }
+
+    /* Flush before forking so buffered shell output isn't duplicated
+     * into the child's copy of the stdio buffers. */
+    fflush(stdout);
 
     pid_t pid = fork();
     if (pid < 0) {
@@ -124,14 +130,12 @@ int execute_command(Command *cmd) {
         _exit(127);
     }
 
-    /*
-     * NOTE(teammate, Part 8): cmd->background is set but not yet acted
-     * on here. Once background processing is implemented, branch on
-     * it: call add_job(pid, <original command line>) and return
-     * immediately instead of falling through to waitpid() below.
-     * Waiting unconditionally is a safe placeholder so the shell stays
-     * correct (just not concurrent) until then.
-     */
+    /* Part 8: don't wait on a background job; the main loop reaps it
+     * later via reap_finished_jobs(). */
+    if (cmd->background) {
+        add_job(pid, cmd->cmdline != NULL ? cmd->cmdline : cmd->argv[0]);
+        return 0;
+    }
 
     int status;
     if (waitpid(pid, &status, 0) < 0) {

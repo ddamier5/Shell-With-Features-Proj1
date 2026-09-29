@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -26,14 +27,23 @@ void expand_tilde(const char *token, char *out, size_t out_size) {
     }
 }
 
+/* Part 2: Environment variable expansion (Ammiel Bowen). Only whole
+ * arguments are expanded, per the project assumptions: "$USER" becomes
+ * the value of USER, an unset variable becomes "" (as in Bash), and a
+ * lone "$" is left as a literal. */
 void expand_env_var(const char *token, char *out, size_t out_size) {
-    /*
-     * Part 2: Environment variable expansion — NOT assigned to
-     * Ammiel Bowen. TODO(teammate): look up token+1 via getenv() and
-     * copy the result (or "" if unset) into `out`. Passed through
-     * unchanged for now.
-     */
-    strncpy(out, token, out_size - 1);
+    if (token[0] != '$' || token[1] == '\0') {
+        strncpy(out, token, out_size - 1);
+        out[out_size - 1] = '\0';
+        return;
+    }
+
+    const char *value = getenv(token + 1);
+    if (value == NULL) {
+        value = "";
+    }
+
+    strncpy(out, value, out_size - 1);
     out[out_size - 1] = '\0';
 }
 

@@ -45,12 +45,18 @@ int parse_command(char *tokens[], int ntokens, Command *cmd);
 int execute_command(Command *cmd);
 
 /*
- * Part 7: Piping — NOT assigned to Ammiel Bowen.
- * TODO(teammate): chain `n` Commands with pipe()+dup2(), forking one
- * child per stage and connecting stage i's stdout to stage i+1's
- * stdin. Not yet called from main.c — wire up '|' detection there.
- * For "cmd1 | cmd2 &", skip the waits and call
- * add_job(<last stage's pid>, cmds[0].cmdline) instead (Part 8).
+ * Part 7: Piping (Don Damier, lead) -- implemented in src/pipeline.c.
+ *
+ * Runs `n` Commands connected by pipe(), one forked child per stage,
+ * stage i's stdout feeding stage i+1's stdin. Supports any number of
+ * stages. cmds[0].infile and cmds[n-1].outfile are honored (extra
+ * credit: piping + I/O redirection). If cmds[n-1].background is set the
+ * pipeline is not waited on and add_job() gets the LAST stage's PID.
+ *
+ * Returns the last stage's exit status when run in the foreground, 0
+ * after launching a background pipeline, or -1 if the pipeline could
+ * not be run (command not found, pipe/fork failure) -- same contract
+ * as execute_command().
  */
 int execute_pipeline(Command *cmds, int n);
 

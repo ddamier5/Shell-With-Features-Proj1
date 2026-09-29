@@ -7,7 +7,7 @@ piping, background processing, and the built-ins `exit`, `cd` and `jobs`.
 
 ## Group Members
 - **Ammiel Bowen**: [FSU email]
-- **Don Damier**: [FSU email]
+- **Don Damier**: dd23t@fsu.edu
 - **Widens Filsaime**: [FSU email]
 
 ## Division of Labor
